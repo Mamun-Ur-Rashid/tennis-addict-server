@@ -28,6 +28,12 @@ async function run() {
 
 
     const toysCollection = client.db('tennisDb').collection('toys');
+    // get my toys 
+    app.get('/myToys/:email', async(req, res) =>{
+        console.log(req.params.email);
+        const toys = await toysCollection.find({ sellerEmail : req.params.email}).toArray();
+        res.send(toys);
+    })
 
     app.post('/post-Toys', async( req, res) => {
         const toy = req.body;

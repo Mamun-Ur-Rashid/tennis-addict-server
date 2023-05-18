@@ -27,7 +27,14 @@ async function run() {
     await client.connect();
 
 
-    const tennisCollection = client.db('tennisDb').collection('tennis');
+    const toysCollection = client.db('tennisDb').collection('toys');
+
+    app.post('/post-Toys', async( req, res) => {
+        const toy = req.body;
+        console.log(toy);
+        const result = await toysCollection.insertOne(toy);
+        res.send(result);
+    })
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });

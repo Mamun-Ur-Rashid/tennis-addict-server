@@ -24,14 +24,28 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
 
     const toysCollection = client.db('tennisDb').collection('toys');
+
+    const indexKeys = { toyName : 1};
+    const indexOptions = { name : "toyName"};
+    const result = await toysCollection.createIndex(indexKeys, indexOptions);
+
+    app.get('/toySearchByName/:text', async (req, res) => {
+      const text = req.params.text;
+      const result = await toysCollection.find({
+        
+           toyName: { $regex : text, $options: "i"}
+        
+      }).toArray();
+      res.send(result);
+    })
     // get my toys 
     app.get('/myToys/:email', async (req, res) => {
       // console.log(req.params.email);
-      const toys = await toysCollection.find({ sellerEmail: req.params.email }).toArray();
+      const toys = await toysCollection.find({ sellerEmail: req.params.email }).sort({price: 1}).toArray();
       res.send(toys);
     })
     // get all toys 
@@ -39,6 +53,14 @@ async function run() {
       const toys = toysCollection.find().limit(20);
       const result = await toys.toArray();
       res.send(result);
+    })
+    // single toy
+    app.get('/singleToy/:id', async(req, res) =>{
+      const id = req.params.id;
+      console.log(id);
+      const query = { _id: new ObjectId(id)};
+      const singleToy = await toysCollection.findOne(query);
+      res.send(singleToy);
     })
     app.get('/allToys/:text', async (req, res) => {
       console.log(req.params.text);
@@ -104,7 +126,7 @@ run().catch(console.dir);
 
 
 
-app.get('/get', (req, res) => {
+app.get('/', (req, res) => {
   res.send("Tennis server is running");
 })
 

@@ -29,48 +29,67 @@ async function run() {
 
     const toysCollection = client.db('tennisDb').collection('toys');
     // get my toys 
-    app.get('/myToys/:email', async(req, res) =>{
-        console.log(req.params.email);
-        const toys = await toysCollection.find({ sellerEmail : req.params.email}).toArray();
-        res.send(toys);
+    app.get('/myToys/:email', async (req, res) => {
+      // console.log(req.params.email);
+      const toys = await toysCollection.find({ sellerEmail: req.params.email }).toArray();
+      res.send(toys);
+    })
+    // get all toys 
+    app.get('/allToys', async (req, res) => {
+      const toys = toysCollection.find().limit(20);
+      const result = await toys.toArray();
+      res.send(result);
+    })
+    app.get('/allToys/:text', async (req, res) => {
+      console.log(req.params.text);
+      if (req.params.text == "Tennis Rackets" || req.params.text == "Tennis Balls" || req.params.text == "Tennis Accessories") {
+        const result = await toysCollection.find({ category: req.params.text }).toArray();
+        return res.send(result);
+      }
+      const toys = toysCollection.find();
+      const result = await toys.toArray();
+      res.send(result);
+
     })
 
-    app.post('/post-Toys', async( req, res) => {
-        const toy = req.body;
-        console.log(toy);
-        const result = await toysCollection.insertOne(toy);
-        res.send(result);
+
+
+    app.post('/post-Toys', async (req, res) => {
+      const toy = req.body;
+      console.log(toy);
+      const result = await toysCollection.insertOne(toy);
+      res.send(result);
     })
     // update my toy
-    app.get('/toys/:id', async(req, res) => {
-        const id = req.params.id;
-        const query = { _id: new ObjectId(id)};
-        const toy = await toysCollection.findOne(query);
-        res.send(toy);
+    app.get('/toys/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const toy = await toysCollection.findOne(query);
+      res.send(toy);
 
     })
     // finally update toy
-    app.put('/toys/:id', async(req, res) => {
-        const id = req.params.id;
-        const body = req.body;
-        console.log(body);
-        const filter = { _id : new ObjectId(id)};
-        const updateJob = {
-            $set: {
-                price: body.price,
-                quantity: body.quantity,
-                description:body.description
-            }
+    app.put('/toys/:id', async (req, res) => {
+      const id = req.params.id;
+      const body = req.body;
+      // console.log(body);
+      const filter = { _id: new ObjectId(id) };
+      const updateJob = {
+        $set: {
+          price: body.price,
+          quantity: body.quantity,
+          description: body.description
         }
-        const result = await toysCollection.updateOne(filter, updateJob);
-        res.send(result);
+      }
+      const result = await toysCollection.updateOne(filter, updateJob);
+      res.send(result);
     })
     // delete a toy
-    app.delete('/toys/:id', async(req, res) => {
-        const id = req.params.id;
-        const query = { _id : new ObjectId(id)};
-        const result = await toysCollection.deleteOne(query);
-        res.send(result);
+    app.delete('/toys/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await toysCollection.deleteOne(query);
+      res.send(result);
     })
 
     // Send a ping to confirm a successful connection
@@ -86,9 +105,9 @@ run().catch(console.dir);
 
 
 app.get('/get', (req, res) => {
-    res.send("Tennis server is running");
+  res.send("Tennis server is running");
 })
 
 app.listen(port, () => {
-    console.log(`Tennis server running port on :${port}`);
+  console.log(`Tennis server running port on :${port}`);
 });
